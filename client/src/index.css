@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #F4F1E8;
+  --color-ink: #14141A;
+  --color-accent: #2D4BFF;
+  --color-hl: #FFE14D;
+  --font-display: "Bricolage Grotesque", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-hand: "Caveat", cursive;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(rgba(20,20,26,.15) 1px, transparent 1.3px) 0 0 / 22px 22px, #F4F1E8;
+  color: #14141A;
+  font-family: "DM Sans", sans-serif;
+  min-height: 100vh;
+}
+
+h1, h2, h3 { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+
+.box {
+  background: #fff; border: 2px solid #14141A; border-radius: 14px;
+  box-shadow: 4px 4px 0 #14141A; padding: 20px;
+}
+.btn {
+  font: 700 14px "DM Sans", sans-serif; padding: 10px 18px; border: 2px solid #14141A;
+  border-radius: 999px; background: #FFE14D; color: #14141A; box-shadow: 3px 3px 0 #14141A;
+  cursor: pointer; transition: transform .12s, box-shadow .12s;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #14141A; }
+.btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #14141A; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-ac { background: #2D4BFF; color: #fff; }
+.input {
+  width: 100%; padding: 11px 14px; border: 2px solid #14141A; border-radius: 10px;
+  background: #fff; font: inherit; color: #14141A;
+}
+.input:focus { outline: 0; box-shadow: 3px 3px 0 #2D4BFF; }
+.hl { background: linear-gradient(#FFE14D, #FFE14D) no-repeat 0 88% / 100% 48%; }
