@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -46,10 +47,14 @@ export default function Dashboard() {
       ) : (
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
           {workspaces.map((w) => (
-            <div key={w._id} className="box">
+            <Link
+              key={w._id}
+              to={`/workspace/${w._id}`}
+              className="box block hover:-translate-y-0.5 transition"
+            >
               <h3 className="text-xl">{w.name}</h3>
               <p className="text-sm opacity-70">{w.members.length} member(s)</p>
-            </div>
+            </Link>
           ))}
         </div>
       )}
