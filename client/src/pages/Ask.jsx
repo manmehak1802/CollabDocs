@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 const IDEAS = ['Summarize this week', 'What did we decide?', 'What are the open questions?'];
 
-// Highlights citation markers like [1] in the answer
 const renderAnswer = (text) =>
   text.split(/(\[\d+\])/g).map((part, i) => (/^\[\d+\]$/.test(part) ? <mark key={i}>{part}</mark> : part));
 
 export default function Ask() {
   const toast = useToast();
+  const location = useLocation();
   const [workspaces, setWorkspaces] = useState([]);
   const [scope, setScope] = useState('all');
   const [q, setQ] = useState('');
@@ -51,6 +51,13 @@ export default function Ask() {
     setScope(sc);
     if (last) run(last, sc);
   };
+
+  // A question sent from the command palette runs automatically
+  useEffect(() => {
+    const incoming = location.state?.q;
+    if (incoming) run(incoming);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
 
   const reindex = async () => {
     setIndexing(true);

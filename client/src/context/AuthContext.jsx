@@ -8,7 +8,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On page load: if a token exists, ask the server who we are
   useEffect(() => {
     if (!localStorage.getItem('token')) {
       setLoading(false);
@@ -34,9 +33,10 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     setUser(null);
   };
+  const updateName = (name) => setUser((u) => ({ ...u, name }));
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateName }}>
       {children}
     </AuthContext.Provider>
   );

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { timeAgo } from '../utils/time';
 
-// A notebook cover that tilts toward your mouse
 function Cover({ w, i }) {
   const ref = useRef(null);
   const move = (e) => {
@@ -31,16 +31,17 @@ export default function Dashboard() {
   const { user } = useAuth();
   const toast = useToast();
   const [workspaces, setWorkspaces] = useState(null);
+  const [recent, setRecent] = useState({ total: 0, recent: [] });
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
 
   useEffect(() => {
     api.get('/workspaces').then((r) => setWorkspaces(r.data)).catch(() => setWorkspaces([]));
+    api.get('/documents/recent').then((r) => setRecent(r.data)).catch(() => {});
   }, []);
 
   const list = workspaces || [];
   const myId = String(user._id || user.id);
-  const owned = list.filter((w) => String(w.owner) === myId).length;
   const people = new Set(list.flatMap((w) => w.members.map((m) => String(m.user))));
   people.delete(myId);
   const first = user.name.split(' ')[0];
@@ -69,8 +70,8 @@ export default function Dashboard() {
       <div className="grid sm:grid-cols-3 gap-5 mb-10">
         {[
           [list.length, 'notebooks'],
+          [recent.total, 'documents'],
           [people.size, 'people you work with'],
-          [owned, 'notebooks you own'],
         ].map(([n, label]) => (
           <div key={label} className="box">
             <b className="font-display text-5xl block leading-none">{n}</b>
@@ -87,40 +88,67 @@ export default function Dashboard() {
       {workspaces === null ? (
         <p className="font-bold">Loading…</p>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {list.map((w, i) => (
-            <Cover key={w._id} w={w} i={i} />
-          ))}
-
-          {adding ? (
-            <form onSubmit={create} className="nb nb-new nb-form">
-              <input
-                autoFocus
-                className="input"
-                placeholder="Notebook name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <div className="flex gap-2 mt-3">
-                <button className="btn btn-ac flex-1">Create</button>
-                <button
-                  type="button"
-                  className="btn btn-pl"
-                  onClick={() => {
-                    setAdding(false);
-                    setName('');
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <button className="nb nb-new" onClick={() => setAdding(true)}>
-              <span className="t">+ New notebook</span>
-            </button>
+        <>
+          {list.length === 0 && (
+            <div className="box mb-6 fade-up">
+              <h3 className="text-2xl mb-1">Your first notebook starts here</h3>
+              <p className="opacity-70">
+                A notebook holds documents for one project. Create one below, then invite teammates.
+              </p>
+            </div>
           )}
-        </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {list.map((w, i) => (
+              <Cover key={w._id} w={w} i={i} />
+            ))}
+
+            {adding ? (
+              <form onSubmit={create} className="nb nb-new nb-form">
+                <input
+                  autoFocus
+                  className="input"
+                  placeholder="Notebook name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <div className="flex gap-2 mt-3">
+                  <button className="btn btn-ac flex-1">Create</button>
+                  <button
+                    type="button"
+                    className="btn btn-pl"
+                    onClick={() => {
+                      setAdding(false);
+                      setName('');
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button className="nb nb-new" onClick={() => setAdding(true)}>
+                <span className="t">+ New notebook</span>
+              </button>
+            )}
+          </div>
+
+          <h3 className="text-2xl mb-3">Recent</h3>
+          {recent.recent.length === 0 ? (
+            <p className="opacity-70">Documents you edit will show up here.</p>
+          ) : (
+            <div>
+              {recent.recent.map((d) => (
+                <Link key={d._id} to={`/doc/${d._id}`} className="recent-row">
+                  <span>
+                    <b>{d.title}</b> <small className="opacity-60">· {d.workspaceName}</small>
+                  </span>
+                  <small className="opacity-70 whitespace-nowrap">{timeAgo(d.updatedAt)}</small>
+                </Link>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

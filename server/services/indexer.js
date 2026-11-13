@@ -1,5 +1,6 @@
 const Doc = require('../models/Document');
 const Chunk = require('../models/Chunk');
+const Workspace = require('../models/Workspace');
 const { htmlToText, chunkText } = require('../utils/chunker');
 const { embed } = require('./gemini');
 
@@ -9,6 +10,14 @@ async function indexDocument(docId) {
     await Chunk.deleteMany({ doc: docId });
     return 0;
   }
+
+  // If the owner switched AI off for this notebook, keep nothing indexed
+  const ws = await Workspace.findById(doc.workspace).select('aiEnabled');
+  if (!ws || ws.aiEnabled === false) {
+    await Chunk.deleteMany({ doc: doc._id });
+    return 0;
+  }
+
   const chunks = chunkText(htmlToText(doc.content));
   if (!chunks.length) {
     await Chunk.deleteMany({ doc: doc._id });

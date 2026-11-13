@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard';
 import Notebook from './pages/Notebook';
 import DocPage from './pages/DocPage';
 import Ask from './pages/Ask';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 
 const guard = (el) => (
   <ProtectedRoute>
@@ -28,7 +30,8 @@ export default function App() {
             <Route path="/workspace/:id" element={guard(<Notebook />)} />
             <Route path="/doc/:id" element={guard(<DocPage />)} />
             <Route path="/ask" element={guard(<Ask />)} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/settings" element={guard(<Settings />)} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </ToastProvider>

@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+app.use('/api', require('./routes/extraRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/workspaces', require('./routes/workspaceRoutes'));
 app.use('/api/documents', require('./routes/documentRoutes'));
