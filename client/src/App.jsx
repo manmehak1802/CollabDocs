@@ -5,6 +5,7 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Notebook from './pages/Notebook';
 import DocPage from './pages/DocPage';
+import Ask from './pages/Ask';
 
 const guard = (el) => <ProtectedRoute>{el}</ProtectedRoute>;
 
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/dashboard" element={guard(<Dashboard />)} />
           <Route path="/workspace/:id" element={guard(<Notebook />)} />
           <Route path="/doc/:id" element={guard(<DocPage />)} />
+          <Route path="/ask" element={guard(<Ask />)} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

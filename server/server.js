@@ -15,6 +15,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/workspaces', require('./routes/workspaceRoutes'));
 app.use('/api/documents', require('./routes/documentRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 app.use(require('./middleware/errorHandler'));
 
 const server = http.createServer(app);

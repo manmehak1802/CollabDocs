@@ -28,11 +28,14 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-8">
         <h1 className="text-4xl">
           Hey {user.name}, <span className="hl">ready to write?</span>
         </h1>
-        <button className="btn" onClick={logout}>Log out</button>
+        <div className="flex gap-3">
+          <Link to="/ask" className="btn btn-ac">Ask your notes</Link>
+          <button className="btn" onClick={logout}>Log out</button>
+        </div>
       </div>
 
       <form onSubmit={create} className="flex gap-3 mb-8 max-w-md">

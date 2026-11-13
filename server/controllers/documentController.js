@@ -1,5 +1,7 @@
 const Doc = require('../models/Document');
+const Chunk = require('../models/Chunk');
 const { getAccess } = require('../utils/access');
+const { scheduleIndex } = require('../services/indexer');
 
 const canEdit = (role) => role === 'owner' || role === 'editor';
 
@@ -48,6 +50,7 @@ exports.update = async (req, res) => {
   if (content !== undefined) doc.content = String(content);
   doc.lastEditedBy = req.user._id;
   await doc.save();
+  scheduleIndex(doc._id); // update the AI index 20 seconds after the last save
   res.json(doc);
 };
 
@@ -59,5 +62,6 @@ exports.remove = async (req, res) => {
     return res.status(403).json({ message: 'Only the owner or creator can delete' });
 
   await doc.deleteOne();
+  await Chunk.deleteMany({ doc: doc._id });
   res.json({ message: 'Document deleted' });
 };
