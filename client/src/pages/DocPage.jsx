@@ -15,6 +15,7 @@ function Editor({ doc, canEdit }) {
   const [online, setOnline] = useState([]);
   const [words, setWords] = useState(countWords(doc.content.replace(/<[^>]+>/g, ' ')));
   const [focus, setFocus] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false); // phones: panel is hidden until you tap Ask AI
   const [msgs, setMsgs] = useState([{ text: 'Ask me anything about this notebook.' }]);
   const [aiQ, setAiQ] = useState('');
   const [aiBusy, setAiBusy] = useState(false);
@@ -23,7 +24,8 @@ function Editor({ doc, canEdit }) {
   const dirty = useRef(false);
   const remote = useRef(false);
   const socketRef = useRef(null);
-  const chatEnd = useRef(null);
+  const chatBox = useRef(null);
+  const titleRef = useRef(null);
   const latest = useRef({ title: doc.title, content: doc.content });
 
   const save = () => {
@@ -103,13 +105,29 @@ function Editor({ doc, canEdit }) {
     };
   }, [editor, doc._id]);
 
+  // Scroll only the chat box, never the whole page
   useEffect(() => {
-    chatEnd.current?.scrollIntoView({ block: 'nearest' });
-  }, [msgs]);
+    const box = chatBox.current;
+    if (box) box.scrollTop = box.scrollHeight;
+  }, [msgs, aiBusy]);
+
+  // Make the title field grow to fit long titles
+  const fitTitle = () => {
+    const el = titleRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  };
+  useEffect(fitTitle, [title]);
+  useEffect(() => {
+    window.addEventListener('resize', fitTitle);
+    return () => window.removeEventListener('resize', fitTitle);
+  }, []);
 
   const onTitle = (e) => {
-    setTitle(e.target.value);
-    latest.current.title = e.target.value;
+    const value = e.target.value.replace(/\n/g, ' ');
+    setTitle(value);
+    latest.current.title = value;
     save();
     sendChange();
   };
@@ -143,9 +161,15 @@ function Editor({ doc, canEdit }) {
 
   return (
     <div>
-      <div className={`flex flex-wrap justify-between items-center gap-3 mb-5 transition-opacity ${focus ? 'opacity-30' : ''}`}>
+      {/* top bar */}
+      <div
+        className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-4 transition-opacity ${
+          focus ? 'opacity-30' : ''
+        }`}
+      >
         <Link to={`/workspace/${doc.workspace}`} className="font-bold underline">← Notebook</Link>
-        <div className="flex flex-wrap items-center gap-4">
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <span className="flex items-center gap-2 text-sm font-bold">
             <span className={`w-2.5 h-2.5 rounded-full ${live ? 'bg-accent' : 'bg-gray-400'}`} />
             {live ? 'Live' : 'Offline'}
@@ -162,35 +186,55 @@ function Editor({ doc, canEdit }) {
             ))}
           </span>
           <span className="font-bold text-sm">{canEdit ? status : 'Read only'}</span>
+          {!focus && (
+            <button className="btn btn-pl lg:hidden" onClick={() => setAiOpen(!aiOpen)}>
+              {aiOpen ? 'Hide AI' : 'Ask AI'}
+            </button>
+          )}
           <button className="btn btn-pl" onClick={() => setFocus(!focus)}>
-            {focus ? 'Exit focus' : 'Focus mode'}
+            <span className="hidden sm:inline">{focus ? 'Exit focus' : 'Focus mode'}</span>
+            <span className="sm:hidden">{focus ? 'Exit' : 'Focus'}</span>
           </button>
         </div>
       </div>
 
-      <div className={`grid gap-6 items-start ${focus ? 'max-w-3xl mx-auto' : 'lg:grid-cols-[1fr_21rem]'}`}>
-        <div className="box p-6 md:p-8">
+      <div className={`grid gap-6 items-start ${focus ? 'max-w-3xl mx-auto' : 'lg:grid-cols-[minmax(0,1fr)_21rem]'}`}>
+        {/* the page you write on */}
+        <div className="box min-w-0 p-4 sm:p-6 md:p-8">
           {canEdit && (
-            <div className="flex flex-wrap items-center gap-2 mb-5">
+            <div className="doc-toolbar">
               {tools.map(([label, run]) => (
                 <button key={label} type="button" className="tbtn" onClick={run}>{label}</button>
               ))}
-              <span className="ml-auto text-sm opacity-60">{words} words</span>
             </div>
           )}
-          <input
-            className="w-full font-display text-4xl md:text-5xl font-extrabold mb-4 outline-none bg-transparent"
+
+          <textarea
+            ref={titleRef}
+            rows={1}
+            className="block w-full font-display text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-3 outline-none bg-transparent resize-none overflow-hidden"
             value={title}
             onChange={onTitle}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                editor.commands.focus('start');
+              }
+            }}
             readOnly={!canEdit}
+            placeholder="Untitled document"
+            aria-label="Document title"
           />
+
           <EditorContent editor={editor} />
+          <p className="text-xs opacity-60 mt-4">{words} words</p>
         </div>
 
+        {/* AI panel: always visible on laptops, behind a button on phones */}
         {!focus && (
-          <aside className="box">
+          <aside className={`box min-w-0 ${aiOpen ? '' : 'hidden'} lg:block`}>
             <h3 className="text-2xl mb-3">Ask this notebook</h3>
-            <div className="max-h-80 overflow-auto pr-1">
+            <div ref={chatBox} className="max-h-80 overflow-auto pr-1">
               {msgs.map((m, i) => (
                 <div
                   key={i}
@@ -207,10 +251,15 @@ function Editor({ doc, canEdit }) {
                   <span className="dots"><i /><i /><i /></span>
                 </div>
               )}
-              <div ref={chatEnd} />
             </div>
             <form onSubmit={askAI} className="mt-3">
-              <input className="input" placeholder="Try: which auth method?" value={aiQ} onChange={(e) => setAiQ(e.target.value)} maxLength={500} />
+              <input
+                className="input"
+                placeholder="Try: which auth method?"
+                value={aiQ}
+                onChange={(e) => setAiQ(e.target.value)}
+                maxLength={500}
+              />
             </form>
           </aside>
         )}

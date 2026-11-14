@@ -68,3 +68,18 @@ exports.updateSettings = async (req, res) => {
   if (!workspace.aiEnabled) await Chunk.deleteMany({ workspace: workspace._id });
   res.json({ aiEnabled: workspace.aiEnabled });
 };
+
+// DELETE /api/workspaces/:id: delete a notebook and everything in it (owner only)
+exports.deleteWorkspace = async (req, res) => {
+  const { workspace, role } = await getAccess(req.params.id, req.user._id);
+  if (!workspace) return res.status(404).json({ message: 'Notebook not found' });
+  if (role !== 'owner')
+    return res.status(403).json({ message: 'Only the owner can delete a notebook' });
+
+  await Promise.all([
+    Doc.deleteMany({ workspace: workspace._id }),
+    Chunk.deleteMany({ workspace: workspace._id }),
+  ]);
+  await workspace.deleteOne();
+  res.json({ message: 'Notebook deleted' });
+};

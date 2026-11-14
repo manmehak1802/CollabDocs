@@ -239,3 +239,57 @@ mark { background: linear-gradient(#FFE14D, #FFE14D) no-repeat 0 88% / 100% 48%;
 .recent-row { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem .5rem; border-top: 2px solid #14141A; text-decoration: none; color: inherit; transition: all .15s; }
 .recent-row:hover { background: #FFE14D; padding-left: 1rem; }
 .recent-row:last-child { border-bottom: 2px solid #14141A; }
+
+
+/* ===== auth page: compact so it fits one screen ===== */
+.auth-page .lan { padding-top: 3.5rem; }
+.auth-page .lan::before { top: -1.5rem; height: 5rem; }
+.auth-page .badge { width: 14.5rem; padding: 1.5rem 1.1rem 1.2rem; transform-origin: 50% -4.5rem; }
+.auth-page .hole { margin: -.8rem auto .8rem; }
+.auth-page .ph { width: 4.8rem; height: 4.8rem; font-size: 2.1rem; line-height: 4.5rem; margin-bottom: .5rem; }
+.auth-page .box { padding: 1.2rem 1.4rem; }
+.auth-page .input { padding: .55rem .85rem; font-size: .95rem; }
+.auth-page .btn { padding: .6rem 1.2rem; }
+
+/* short laptop screens: slightly smaller text everywhere */
+@media (min-width: 1024px) and (max-height: 720px) {
+  html { font-size: 16px; }
+}
+
+
+/* ===== dashboard: compact stats, smaller notebooks, more shades ===== */
+.stat {
+  background: #fff; border: 2px solid #14141A; border-radius: .8rem; box-shadow: 3px 3px 0 #14141A;
+  padding: .55rem .9rem; min-width: 6.2rem;
+}
+.stat b { display: block; font: 800 1.7rem/1 "Bricolage Grotesque", sans-serif; }
+.stat span { font-size: .72rem; opacity: .7; }
+
+.nb { min-height: 8.5rem; padding: 1rem .9rem .9rem 2rem; }
+.nb::before { width: .85rem; }
+.nb .t { font-size: 1.15rem; }
+.nb-0 { background: var(--ac); color: #fff; }
+.nb-1 { background: #FFE14D; color: #14141A; }
+.nb-2 { background: #fff; color: #14141A; }
+.nb-3 { background: color-mix(in srgb, var(--ac) 62%, #fff); color: #14141A; }
+.nb-4 { background: #FFD21F; color: #14141A; }
+.nb-5 { background: #EFEAD9; color: #14141A; }
+.nb-6 { background: color-mix(in srgb, var(--ac) 32%, #fff); color: #14141A; }
+.nb-7 { background: #FFEE9A; color: #14141A; }
+.nb-8 { background: color-mix(in srgb, var(--ac) 80%, #000); color: #fff; }
+.nb-9 { background: #E4DEC8; color: #14141A; }
+
+.todo-row { display: flex; align-items: center; gap: .6rem; padding: .5rem 0; border-top: 2px solid #14141A; }
+.todo-row.done span { text-decoration: line-through; opacity: .5; }
+.todo-x { margin-left: auto; background: none; border: 0; cursor: pointer; font-size: 1.3rem; line-height: 1; opacity: .5; }
+.todo-x:hover { opacity: 1; }
+
+/* ===== dashboard: 2 x 2 stat block ===== */
+.stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1rem; min-height: 12rem;
+}
+.stat-grid .stat {
+  min-width: 0; padding: .9rem 1.1rem; display: flex; flex-direction: column; justify-content: center;
+}
+.stat-grid .stat b { font-size: 2.3rem; }
+.stat-grid .stat span { font-size: .85rem; }

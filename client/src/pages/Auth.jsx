@@ -22,7 +22,8 @@ export default function Auth() {
     setShake((n) => n + 1);
   };
 
-  const display = form.name.trim() || form.email.split('@')[0].trim() || 'Your name';
+  // The badge only uses the name while you are signing up
+  const display = (mode === 'up' && form.name.trim()) || form.email.split('@')[0].trim() || 'Your name';
   const initial = display === 'Your name' ? '?' : display[0].toUpperCase();
   const score = strength(form.password);
 
@@ -47,14 +48,14 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="px-6 md:px-12 pt-7">
-        <Link to="/" className="font-display text-4xl md:text-5xl font-extrabold">
+    <div className="auth-page min-h-screen flex flex-col">
+      <header className="px-6 md:px-12 pt-5">
+        <Link to="/" className="font-display text-3xl font-extrabold">
           collab<span className="hl">docs</span>
         </Link>
       </header>
 
-      <main className="flex-1 grid md:grid-cols-2 gap-8 md:gap-16 items-center w-full max-w-6xl mx-auto px-6 md:px-12 py-8">
+      <main className="flex-1 grid md:grid-cols-2 gap-6 md:gap-14 items-center w-full max-w-5xl mx-auto px-6 md:px-12 py-4">
         {/* ID badge that fills in as you type */}
         <div className="lan">
           <div className="badge">
@@ -69,28 +70,23 @@ export default function Auth() {
         {/* heading and form */}
         <div>
           <p className="eye">{mode === 'in' ? 'Welcome back' : 'Join CollabDocs'}</p>
-          <h1 className="text-5xl md:text-6xl my-3">
+          <h1 className="text-4xl lg:text-[2.7rem] mt-1 mb-4">
             {mode === 'in' ? (
               <>Good to see <span className="hl">you</span>.</>
             ) : (
-              <>Let’s make <span className="hl">your badge</span>.</>
+              <>Make your <span className="hl">badge</span>.</>
             )}
           </h1>
-          <p className="opacity-70 mb-6 max-w-md">
-            {mode === 'in'
-              ? 'Log in to open your notebooks and ask your notes.'
-              : 'Create an account to start your first notebook.'}
-          </p>
 
           <div key={shake} className={shake ? 'shk' : ''}>
-            <form onSubmit={submit} noValidate className="box p-6 md:p-8">
-              <div className="flex gap-2 mb-5">
+            <form onSubmit={submit} noValidate className="box">
+              <div className="flex gap-2 mb-4">
                 {[['in', 'Log in'], ['up', 'Sign up']].map(([m, label]) => (
                   <button
                     type="button"
                     key={m}
                     onClick={() => setMode(m)}
-                    className={`flex-1 py-2.5 font-bold border-2 border-ink rounded-xl ${
+                    className={`flex-1 py-2 font-bold border-2 border-ink rounded-xl ${
                       mode === m ? 'bg-ink text-paper' : 'bg-white'
                     }`}
                   >
@@ -102,17 +98,37 @@ export default function Auth() {
               {mode === 'up' && (
                 <>
                   <label className="text-xs font-bold uppercase">Name</label>
-                  <input className="input mt-1 mb-4" value={form.name} onChange={set('name')} placeholder="Manmehak" />
+                  <input
+                    className="input mt-1 mb-3"
+                    value={form.name}
+                    onChange={set('name')}
+                    placeholder="Your full name"
+                    autoComplete="off"
+                  />
                 </>
               )}
               <label className="text-xs font-bold uppercase">Email</label>
-              <input className="input mt-1 mb-4" type="email" value={form.email} onChange={set('email')} placeholder="you@example.com" />
+              <input
+                className="input mt-1 mb-3"
+                type="email"
+                value={form.email}
+                onChange={set('email')}
+                placeholder="you@example.com"
+                autoComplete="email"
+              />
               <label className="text-xs font-bold uppercase">Password</label>
-              <input className="input mt-1 mb-3" type="password" value={form.password} onChange={set('password')} placeholder="6+ characters" />
+              <input
+                className="input mt-1 mb-2"
+                type="password"
+                value={form.password}
+                onChange={set('password')}
+                placeholder="6+ characters"
+                autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
+              />
               <div className="meter"><i style={{ width: `${(score / 3) * 100}%` }} /></div>
-              <p className="text-xs opacity-70 mb-5">{LABELS[score]}</p>
+              <p className="text-xs opacity-70 mb-4">{LABELS[score]}</p>
 
-              <button className="btn btn-ac w-full py-3" disabled={busy}>
+              <button className="btn btn-ac w-full" disabled={busy}>
                 {busy ? 'Please wait…' : mode === 'in' ? 'Log in' : 'Create account'}
               </button>
             </form>
